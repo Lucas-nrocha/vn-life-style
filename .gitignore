@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Environment variables - NUNCA subir
+.env
+.env.local
+.env.development
+.env.production
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+claude.exe
+.claude/
