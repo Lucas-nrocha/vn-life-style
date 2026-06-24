@@ -116,6 +116,16 @@ export const newsletterApi = {
   subscribe: (email: string) => api.post('/api/newsletter/subscribe', { email }),
 };
 
+export const uploadApi = {
+  uploadProductImage: (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return api.post<{ url: string }>('/api/admin/upload/produtos', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
+
 export const adminApi = {
   getDashboard: () => api.get('/api/admin/dashboard'),
   getOrders: (params?: Record<string, unknown>) => api.get('/api/admin/orders', { params }),

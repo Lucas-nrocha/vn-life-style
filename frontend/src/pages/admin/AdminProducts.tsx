@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Edit2, ToggleLeft, ToggleRight, Trash2, X, AlertTriangle, Search } from 'lucide-react';
-import { adminApi, productApi } from '../../services/api';
+import { Plus, Edit2, ToggleLeft, ToggleRight, Trash2, X, AlertTriangle, Search, Upload } from 'lucide-react';
+import { adminApi, productApi, uploadApi } from '../../services/api';
 import { Product, Category } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -39,6 +39,7 @@ export function AdminProducts() {
   const [variants, setVariants] = useState<VariantRow[]>([{ ...EMPTY_VARIANT }]);
   const [deletedVariantIds, setDeletedVariantIds] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState('');
+  const [imageUploading, setImageUploading] = useState(false);
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -82,6 +83,21 @@ export function AdminProducts() {
   const handleFilterChange = (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPage(1);
     setter(e.target.value);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading(true);
+    try {
+      const { data } = await uploadApi.uploadProductImage(file);
+      setImageUrl(data.url);
+    } catch {
+      toast.error('Erro ao fazer upload da imagem');
+    } finally {
+      setImageUploading(false);
+      e.target.value = '';
+    }
   };
 
   const openCreate = () => {
@@ -414,12 +430,58 @@ export function AdminProducts() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <Input
-                    label="URL da imagem principal"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://..."
-                  />
+                  <label className="block text-xs text-text-secondary mb-1.5">Imagem do produto</label>
+                  {imageUrl ? (
+                    <div className="relative inline-block">
+                      <img
+                        src={imageUrl}
+                        alt="Preview"
+                        className="h-32 w-32 object-cover rounded-lg border border-border"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setImageUrl('')}
+                        className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 transition-colors"
+                        title="Remover imagem"
+                      >
+                        <X size={12} />
+                      </button>
+                      <label className="mt-2 flex items-center gap-1.5 cursor-pointer text-xs text-text-muted hover:text-text-primary transition-colors">
+                        <Upload size={12} />
+                        Trocar imagem
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".png,.jpg,.jpeg,.svg"
+                          onChange={handleImageUpload}
+                          disabled={imageUploading}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <label
+                      className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-text-muted transition-colors ${imageUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                      <div className="flex flex-col items-center gap-1">
+                        {imageUploading ? (
+                          <span className="text-xs text-text-muted">Enviando...</span>
+                        ) : (
+                          <>
+                            <Upload size={20} className="text-text-muted" />
+                            <span className="text-xs text-text-muted">Clique para selecionar imagem</span>
+                            <span className="text-xs text-text-muted opacity-60">PNG, JPG ou SVG · máx. 5MB</span>
+                          </>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".png,.jpg,.jpeg,.svg"
+                        onChange={handleImageUpload}
+                        disabled={imageUploading}
+                      />
+                    </label>
+                  )}
                 </div>
 
                 <div className="sm:col-span-2 flex items-center gap-2">

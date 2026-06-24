@@ -181,6 +181,14 @@ export async function updateProduct(req: AuthRequest, res: Response, next: NextF
       data: {
         ...rest,
         ...(name ? { name, slug: slugify(name) } : {}),
+        ...(images !== undefined
+          ? {
+              images: {
+                deleteMany: {},
+                create: images.map((img, i) => ({ ...img, position: i })),
+              },
+            }
+          : {}),
       },
       include: productInclude,
     });

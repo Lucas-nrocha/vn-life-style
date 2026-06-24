@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
+import path from 'path';
 
 import authRoutes from './routes/auth';
 import productRoutes from './routes/products';
@@ -14,6 +15,7 @@ import userRoutes from './routes/user';
 import adminRoutes from './routes/admin';
 import wishlistRoutes from './routes/wishlist';
 import newsletterRoutes from './routes/newsletter';
+import uploadRoutes from './routes/upload';
 import { errorHandler } from './middleware/errorHandler';
 import { apiLimiter } from './middleware/rateLimiter';
 
@@ -55,6 +57,8 @@ if (process.env.NODE_ENV !== 'test') {
 
 app.use('/api', apiLimiter);
 
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
 app.use('/api/auth', authRoutes);
@@ -66,5 +70,6 @@ app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/admin/upload', uploadRoutes);
 
 app.use(errorHandler);
